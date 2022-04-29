@@ -34,6 +34,10 @@ export class Negotiator {
           config
         );
         dataConnection.initialize(dataChannel);
+      } else if (this.connection.type === ConnectionType.Media) {
+        const mediaConnection = <MediaConnection>this.connection;
+        const dataChannel = peerConnection.createDataChannel(mediaConnection.connectionId);
+        mediaConnection.initialize(dataChannel);
       }
 
       this._makeOffer();
@@ -170,6 +174,13 @@ export class Negotiator {
 
     if (this.connection.type === ConnectionType.Data) {
       const dataConnection = <DataConnection>this.connection;
+      const dataChannel = dataConnection.dataChannel;
+
+      if (dataChannel) {
+        dataChannelNotClosed = !!dataChannel.readyState && dataChannel.readyState !== "closed";
+      }
+    } else if (this.connection.type === ConnectionType.Media) {
+      const dataConnection = <MediaConnection>this.connection;
       const dataChannel = dataConnection.dataChannel;
 
       if (dataChannel) {
